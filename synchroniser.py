@@ -5,7 +5,8 @@ import PySimpleGUI as sg
 
 WIDTH = 500
 HEIGHT = 500
-start_cwd='.'
+start_cwd=os.getcwd()
+
 
 #1 layout
 layout= [   [sg.Text('Choose folders you want to synchronise', justification='center', size=(WIDTH,1))], 
@@ -23,34 +24,30 @@ window = sg.Window('Folder synchronization', layout, grab_anywhere=False, locati
         get_monitors()[0].height/2-HEIGHT/2), size=(WIDTH,HEIGHT), element_justification='c')
 
 last_selected = ''
-add_to_cwd = ''
-#3 event loop
+current_cwd = start_cwd.split('/')
+for element in current_cwd:
+    if len(element) == 0:
+        current_cwd.remove(element)
+
+   
 while True:
     event, values = window.read()
-    default_cwd = values['browseInput']
     if event in (None, 'Exit'):
         break
     if event == 'checkButton':
         if values['browseInput'] != '':
-            window['fromListbox'].update( values=['..']+os.listdir(path=default_cwd) )        
+            window['fromListbox'].update( values=['..']+os.listdir(path=values['browseInput']) )        
     elif len(values['fromListbox']) != 0:
         current_selected = values['fromListbox'][0]
         if current_selected == '..':
-            if len(add_to_cwd) != 0:
-                add_to_cwd += '/..'
-            else:
-                add_to_cwd += '..'
-            print(add_to_cwd)
             last_selected = values['fromListbox'][0]
-            window['fromListbox'].update( values=['..']+os.listdir(add_to_cwd+default_cwd) )
+            window['fromListbox'].update( values=['..']+os.listdir('/'+'/'.join([str(current_cwd[i]) for i in range(len(current_cwd)-1)]) ))
         elif current_selected != last_selected:
             last_selected = values['fromListbox'][0]
-            window['fromListbox'].update( values=['..']+os.listdir(path=add_to_cwd+'/'+current_selected) )
-
-    print('Default_cwd: '+default_cwd)
-    print('last_selected: '+last_selected)
-    print('add_to_cwd: '+add_to_cwd)
+            window['fromListbox'].update( values=['..']+os.listdir(path='/'+'/'.join([str(current_cwd[i]) for i in range(len(current_cwd)-1)])+'/'+last_selected ) )
     
-    
-
+    #print(start_cwd)
+    #print('Default_cwd: ')
+    #print('last_selected: '+last_selected)
+    #print('add_to_cwd: ')
 window.close()
